@@ -2,6 +2,7 @@
   "name": "mediacontrol",
   "description": "Zubrick MediaControl",
   "version": "0.1.0",
+  "license": "UNLICENSED",
   "author": "Gregory Brusick",
   "email": "zubrick@number6.ch",
   "scripts": {
@@ -9,10 +10,11 @@
     "release:minor": "VERSION=$(npm version minor -m 'Bump version to %s') && VERSION=$(echo $VERSION | cut -c 2- | rev | cut -c 3- | rev) && git checkout -b release-$VERSION",
     "release:major": "VERSION=$(npm version major -m 'Bump version to %s') && VERSION=$(echo $VERSION | cut -c 2- | rev | cut -c 3- | rev) && git checkout -b release-$VERSION"
   },
-  "files": [
-  ],
+  "files": [],
   "dependencies": {
+    "dbus": "^1.0.5",
+    "loudness": "^0.3.0",
+    "node-hid": "^1.1.0"
   },
-  "devDependencies": {
-  }
+  "devDependencies": {}
 }
