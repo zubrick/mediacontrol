@@ -48,7 +48,7 @@ setInterval(() => {
   }
   DBusList();
   console.log('***Satus', selected, services[selected].status);
-}, 10000);
+}, 5000);
 
 function receivedData(data) {
   if (data[0] == 0x66) {
@@ -69,12 +69,12 @@ function sendPlayerStatus() {
   data[0] = 0x60;
   data[1] = 0x01;
   for (let i = 0; i < services[selected].identity.length && i < 20; i++) {
-    data[2 + i] = services[selected].identity[i];
+    data[2 + i] = services[selected].identity[i].charCodeAt(0);
   }
   for (let i = 0; i < services[selected].status.length && i < 20; i++) {
-    data[2 + 20 + i] = services[selected].status[i];
+    data[2 + 20 + i] = services[selected].status[i].charCodeAt(0);
   }
-  console.log('status buffer', data);
+  //console.log('status buffer', data);
   device.write(data);
 }
 
@@ -83,15 +83,15 @@ function sendMetadata(artist, title, album) {
   data[0] = 0x60;
   data[1] = 0x02;
   for (let i = 0; i < artist.length && i < 20; i++) {
-    data[2 + i] = artist[i];
+    data[2 + i] = artist[i].charCodeAt(0);
   }
   for (let i = 0; i < title.length && i < 20; i++) {
-    data[2 + 20 + i] = title[i];
+    data[2 + 20 + i] = title[i].charCodeAt(0);
   }
   for (let i = 0; i < album.length && i < 20; i++) {
-    data[2 + 40 + i] = album[i];
+    data[2 + 40 + i] = album[i].charCodeAt(0);
   }
-  console.log('status buffer', data);
+  //console.log('status buffer', data);
   device.write(data);
 }
 
