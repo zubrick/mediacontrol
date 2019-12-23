@@ -26,7 +26,7 @@ module.exports = class {
     r = r.replace(new RegExp(/[èéêë]/g),"e");
     r = r.replace(new RegExp(/[ìíîï]/g),"i");
     r = r.replace(new RegExp(/ñ/g),"n");
-    r = r.replace(new RegExp(/[òóôõö]/g),"o");
+    r = r.replace(new RegExp(/[òóôõöø]/g),"o");
     r = r.replace(new RegExp(/œ/g),"oe");
     r = r.replace(new RegExp(/[ùúûü]/g),"u");
     r = r.replace(new RegExp(/[ýÿ]/g),"y");
@@ -115,10 +115,10 @@ module.exports = class {
     if (this.muted) {
       this.muteToggle();
     }
-    if (direction > 0 && this.vol < 100) {
+    if (direction > 0 && this.vol < (100 - this.volIncrement)) {
       this.vol += this.volIncrement;
       loudness.setVolume(this.vol);
-    } else if (direction < 0 && this.vol > 0) {
+    } else if (direction < 0 && this.vol > this.volIncrement) {
       this.vol -= this.volIncrement;
       loudness.setVolume(this.vol);
     }
@@ -145,7 +145,7 @@ module.exports = class {
         data[2 + 20 + i] = 0x00;
       }
     }
-    console.log('changeVolume', this.vol, nbSquares);
+    console.log('changeVolume', direction, this.vol, nbSquares);
 
     //console.log('status buffer', data[0], data[1], data);
     this.hidd.write(data);
