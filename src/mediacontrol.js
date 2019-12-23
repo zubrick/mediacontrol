@@ -4,15 +4,41 @@
  * Description: ffff
  */
 
+var loudness = require('loudness');
+
 module.exports = class {
   constructor(dbus, hidd) {
     this.dbs = dbus;
     this.hidd = hidd;
-    this.volIncrement = 2;
-    this.vol = 10;
+    this.volIncrement = 3;
+
+    this.getMuted();
+    this.getVolume();
+
   }
 
+  noAccent(s){
+    var r=s;//.toLowerCase();
+    r = r.replace(new RegExp(/\s/g)," ");
+    r = r.replace(new RegExp(/[àáâãäå]/g),"a");
+    r = r.replace(new RegExp(/æ/g),"ae");
+    r = r.replace(new RegExp(/ç/g),"c");
+    r = r.replace(new RegExp(/[èéêë]/g),"e");
+    r = r.replace(new RegExp(/[ìíîï]/g),"i");
+    r = r.replace(new RegExp(/ñ/g),"n");
+    r = r.replace(new RegExp(/[òóôõö]/g),"o");
+    r = r.replace(new RegExp(/œ/g),"oe");
+    r = r.replace(new RegExp(/[ùúûü]/g),"u");
+    r = r.replace(new RegExp(/[ýÿ]/g),"y");
+    return r;
+  };
+
   sendLines(msgId, line1, line2, byte1, byte2) {
+    line1 = line1 || '';
+    line2 = line2 || '';
+
+    line1 = this.noAccent(line1);
+    line2 = this.noAccent(line2);
 
     //console.log(services, selected);
     let data = [];
@@ -60,11 +86,28 @@ module.exports = class {
     } else {
       this.sendLines(0x02, '', '');
     }
+    console.log('***', this.dbs.services[this.dbs.selected].identity, status, artist,title);
   }
 
+  getVolume() {
+    loudness.getVolume().then( (vol) => {
+      //console.log('volume', vol);
+      this.vol = vol;
+      // vol = 45
+    });
+  }
+
+  getMuted() {
+    loudness.getMuted().then( (muted) => {
+      //console.log('muted', muted);
+      this.muted = muted;
+      // vol = 45
+    });
+  }
 
   muteToggle() {
-    this.muted = this.muted === 0 ? 1 : 0;
+    loudness.setMuted(!this.muted);
+    this.muted = this.muted ? false: true;
     this.updateStatus();
   }
 
@@ -74,8 +117,10 @@ module.exports = class {
     }
     if (direction > 0 && this.vol < 100) {
       this.vol += this.volIncrement;
+      loudness.setVolume(this.vol);
     } else if (direction < 0 && this.vol > 0) {
       this.vol -= this.volIncrement;
+      loudness.setVolume(this.vol);
     }
 
 
@@ -111,17 +156,17 @@ module.exports = class {
     switch(data[1]) {
     case 0x01:
       this.dbs.method('Previous', (err) => {
-        setTimeout(this.updateStatus, 400);
+        setTimeout(() => {this.updateStatus();}, 200);
       });
       break;
     case 0x02:
       this.dbs.method('PlayPause', (err) => {
-        setTimeout(this.updateStatus, 400);
+        setTimeout(() => {this.updateStatus();}, 200);
       });
       break;
     case 0x03:
       this.dbs.method('Next', (err) => {
-        setTimeout(this.updateStatus, 400);
+        setTimeout(() => {this.updateStatus();}, 200);
       });
       break;
     case 0x10:
@@ -134,14 +179,20 @@ module.exports = class {
       this.changeVolume(1);
       break;
     case 0x20:
-      this.switchSelected();
+      this.dbs.switchSelected();
+      this.updateStatus();
       break;
     }
   }
 
-  updateStatus() {
-    this.dbs.metadata((err, artist, title, album) => {
-      this.sendPlayerStatus(artist, title, album);
+  updateStatus(dbs) {
+    dbs = dbs || this.dbs;
+    dbs.playStatus(undefined, (err, status) => {
+      //console.log('status', status);
+      dbs.metadata((err, artist, title, album) => {
+        this.sendPlayerStatus(artist, title, album);
+        dbs.list();
+      });
     });
   }
 }
