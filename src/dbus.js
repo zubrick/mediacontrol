@@ -143,6 +143,7 @@ module.exports = class {
   }
 
   method(action, cb) {
+    cb = cb || function () {};
     this.bus.getInterface(this.selected, '/org/mpris/MediaPlayer2', 'org.mpris.MediaPlayer2.Player', (err, iface) => {
       if (err) {
         console.error(err);

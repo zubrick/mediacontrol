@@ -14,6 +14,7 @@ module.exports = class {
 
     this.getMuted();
     this.getVolume();
+    this.skip=0;
 
   }
 
@@ -68,6 +69,11 @@ module.exports = class {
     artist = artist || '';
     title = title || '';
 
+    if (this.skip > 0) {
+      this.skip--;
+      return;
+    }
+
     let status = this.dbs.services[this.dbs.selected].status;
     let stByte = 0x01;
     if (this.dbs.services[this.dbs.selected].status === 'Playing') {
@@ -87,6 +93,15 @@ module.exports = class {
       this.sendLines(0x02, '', '');
     }
     console.log('***', this.dbs.services[this.dbs.selected].identity, status, artist,title);
+  }
+
+  pause(line1, line2, line3, line4) {
+    if (this.dbs.services[this.dbs.selected].status === 'Playing') {
+      this.skip=2;
+      this.sendLines(0x01, line1, line2, 0x01);
+      this.sendLines(0x02, line3, line4);
+      this.dbs.method('PlayPause');
+    }
   }
 
   getVolume() {
