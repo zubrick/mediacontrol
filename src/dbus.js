@@ -5,6 +5,7 @@
  */
 
 var DBus = require('dbus');
+
 var exec = require('child_process').exec;
 
 module.exports = class {
@@ -79,15 +80,19 @@ module.exports = class {
   }
 
   getIdentity(service, cb) {
+    if (service.includes('chrome')) {
+      cb(undefined, 'Chrome');
+      return;
+    }
     this.bus.getInterface(service, '/org/mpris/MediaPlayer2', 'org.mpris.MediaPlayer2', (err, iface) => {
       if (err) {
-        //console.error(err);
+        //console.error(service, err);
         cb(err);
         return;
       }
 
       iface.getProperty('Identity', (err, value) => {
-        //console.log('Identity', value);
+        //console.log('Identity', service, value);
         cb(undefined, value);
       });
 
@@ -96,6 +101,10 @@ module.exports = class {
 
   playStatus(service, cb) {
     service = service || this.selected;
+    if (service.includes('chrome')) {
+      cb(undefined, 'Unknown');
+      return;
+    }
     this.bus.getInterface(service, '/org/mpris/MediaPlayer2', 'org.mpris.MediaPlayer2.Player', (err, iface) => {
       if (err) {
         //console.error(err);
@@ -135,7 +144,6 @@ module.exports = class {
             cb (undefined, '', '');
           }
         });
-
       });
     } else {
       cb();
@@ -144,9 +152,18 @@ module.exports = class {
 
   method(action, cb) {
     cb = cb || function () {};
+    if (this.selected.includes('chrome')) {
+      exec('dbus-send --session --print-reply --dest=' + this.selected
+           +  ' /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.' + action, (error, stdout, stderr) => {
+             //console.log(error, stdout, stderr);
+             cb();
+           });
+      return;
+    }
+
     this.bus.getInterface(this.selected, '/org/mpris/MediaPlayer2', 'org.mpris.MediaPlayer2.Player', (err, iface) => {
       if (err) {
-        console.error(err);
+        console.error('Method - get interface error',err);
         cb(err);
         return;
       }
@@ -156,7 +173,7 @@ module.exports = class {
       case 'PlayPause':
         iface.PlayPause((err, value) => {
           if (err) {
-            console.error(err);
+            console.error('Method - PlayPause error', err);
             cb(err);
             return;
           }

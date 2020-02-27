@@ -78,6 +78,8 @@ module.exports = class {
     let stByte = 0x01;
     if (this.dbs.services[this.dbs.selected].status === 'Playing') {
       stByte = 0x02;
+    } else if (this.dbs.services[this.dbs.selected].status === 'Unknown') {
+      stByte = 0x04;
     }
 
     let mtByte = 0x01;
@@ -132,11 +134,14 @@ module.exports = class {
     }
     if (direction > 0 && this.vol < (100 - this.volIncrement)) {
       this.vol += this.volIncrement;
-      loudness.setVolume(this.vol);
     } else if (direction < 0 && this.vol > this.volIncrement) {
       this.vol -= this.volIncrement;
-      loudness.setVolume(this.vol);
+    } else if (direction > 0 && this.vol >= (100 - this.volIncrement)) {
+      this.vol = 100;
+    } else if (direction < 0 && this.vol <= this.volIncrement) {
+      this.vol = 0;
     }
+    loudness.setVolume(this.vol);
 
 
     this.sendLines(0x01, this.dbs.services[this.dbs.selected].identity, this.dbs.services[this.dbs.selected].status);
