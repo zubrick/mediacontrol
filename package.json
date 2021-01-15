@@ -12,10 +12,13 @@
   },
   "files": [],
   "dependencies": {
+    "eslint": "^7.16.0",
+    "image_to_epaper_converter": "^1.0.0",
     "loudness": "^0.3.0",
     "node-hid": "^1.1.0"
   },
   "devDependencies": {
-    "dbus": "^1.0.5"
+    "dbus": "^1.0.5",
+    "eslint-plugin-import": "^2.22.1"
   }
 }
