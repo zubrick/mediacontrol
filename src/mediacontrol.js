@@ -7,7 +7,7 @@
 var loudness = require('loudness');
 
 module.exports = class {
-  constructor(dbus, hidd) {
+  constructor (dbus, hidd) {
     this.dbs = dbus;
     this.hidd = hidd;
     this.volIncrement = 3;
@@ -41,10 +41,10 @@ module.exports = class {
     line1 = this.noAccent(line1);
     line2 = this.noAccent(line2);
 
-    //console.log(services, selected);
-    let data = [];
+    // console.log(services, selected);
+    const data = [];
     for (let i = 0; i < 64; i++) {
-      data[i]=0;
+      data[i] = 0;
     }
     data[0] = 0x60;
     data[1] = msgId;
@@ -54,10 +54,10 @@ module.exports = class {
     for (let i = 0; i < line2.length && i < 20; i++) {
       data[2 + 20 + i] = line2[i].charCodeAt(0);
     }
-    if(byte1) {
+    if (byte1) {
       data[60] = byte1;
     }
-    if(byte2) {
+    if (byte2) {
       data[61] = byte2;
     }
 
@@ -114,9 +114,9 @@ module.exports = class {
     });
   }
 
-  getMuted() {
-    loudness.getMuted().then( (muted) => {
-      //console.log('muted', muted);
+  getMuted () {
+    loudness.getMuted().then((muted) => {
+      // console.log('muted', muted);
       this.muted = muted;
       // vol = 45
     });
