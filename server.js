@@ -8,6 +8,7 @@ var util = require('util');
 var hid = require('./src/hid');
 var dbus = require('./src/dbus');
 var mediacontrol = require('./src/mediacontrol');
+var web = require('./src/web');
 
 var running = false;
 
@@ -16,6 +17,8 @@ var hidd = new hid(receivedData);
 var dbs = new dbus();
 
 var mc = new mediacontrol(dbs, hidd);
+
+var webserver = new web(mc);
 
 hidd.connect();
 

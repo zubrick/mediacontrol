@@ -12,10 +12,11 @@
   },
   "files": [],
   "dependencies": {
-    "eslint": "^7.16.0",
-    "image_to_epaper_converter": "^1.0.0",
+    "dbus-native": "^0.4.0",
     "loudness": "^0.3.0",
-    "node-hid": "^1.1.0"
+    "node-hid": "^1.1.0",
+    "notify-send": "^0.1.2",
+    "request": "^2.88.0"
   },
   "devDependencies": {
     "dbus": "^1.0.5",

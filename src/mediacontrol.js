@@ -14,6 +14,8 @@ module.exports = class {
 
     this.getMuted();
     this.getVolume();
+    this.skip=0;
+
   }
 
   noAccent(s){
@@ -67,10 +69,17 @@ module.exports = class {
     artist = artist || '';
     title = title || '';
 
+    if (this.skip > 0) {
+      this.skip--;
+      return;
+    }
+
     let status = this.dbs.services[this.dbs.selected].status;
     let stByte = 0x01;
     if (this.dbs.services[this.dbs.selected].status === 'Playing') {
       stByte = 0x02;
+    } else if (this.dbs.services[this.dbs.selected].status === 'Unknown') {
+      stByte = 0x04;
     }
 
     let mtByte = 0x01;
@@ -86,6 +95,15 @@ module.exports = class {
       this.sendLines(0x02, '', '');
     }
     console.log('***', this.dbs.services[this.dbs.selected].identity, status, artist,title);
+  }
+
+  pause(line1, line2, line3, line4) {
+    if (this.dbs.services[this.dbs.selected].status === 'Playing') {
+      this.skip=2;
+      this.sendLines(0x01, line1, line2, 0x01);
+      this.sendLines(0x02, line3, line4);
+      this.dbs.method('PlayPause');
+    }
   }
 
   getVolume() {
@@ -116,11 +134,14 @@ module.exports = class {
     }
     if (direction > 0 && this.vol < (100 - this.volIncrement)) {
       this.vol += this.volIncrement;
-      loudness.setVolume(this.vol);
     } else if (direction < 0 && this.vol > this.volIncrement) {
       this.vol -= this.volIncrement;
-      loudness.setVolume(this.vol);
+    } else if (direction > 0 && this.vol >= (100 - this.volIncrement)) {
+      this.vol = 100;
+    } else if (direction < 0 && this.vol <= this.volIncrement) {
+      this.vol = 0;
     }
+    loudness.setVolume(this.vol);
 
 
     this.sendLines(0x01, this.dbs.services[this.dbs.selected].identity, this.dbs.services[this.dbs.selected].status);
