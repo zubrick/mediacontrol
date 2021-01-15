@@ -15,7 +15,7 @@ module.exports = class {
     this.selected = '';
 
     this.bus = DBus.getBus('session');
-    //console.log(bus);
+    console.log(this.bus);
     this.list();
   }
 
@@ -29,22 +29,34 @@ module.exports = class {
       }
       if (next === 1) {
         newSelected = key;
+        break;
       }
       if (key === this.selected) {
         next = 1;
       }
+      //console.log(key, value, first, newSelected, next);
     }
     if (newSelected === '') {
       newSelected = first;
     }
+    //console.log('selection', this.services, this.selected, newSelected);
     this.selected = newSelected;
+  }
+
+  noServices() {
+    for(var prop in this.services) {
+      if(this.services.hasOwnProperty(prop)) {
+        return false;
+      }
+    }
+    return JSON.stringify(this.services) === JSON.stringify({});
   }
 
   list() {
     exec('qdbus | egrep -i \'org.mpris.MediaPlayer2|plasma-browser-integration\'', (error, stdout, stderr) => {
       let arr = stdout.split("\n");
       this.services={};
-      let remaining = 0;
+      let remaining = arr.length;
       let found = false;
       for (let i = 0; i < arr.length; i++) {
         if (arr[i] !== '') {
@@ -52,13 +64,12 @@ module.exports = class {
           //console.log('player', "-"+servicename+"-");
           this.getIdentity(servicename, (err, identity) => {
             if (!err && identity) {
-              //console.log(identity);
-              remaining++;
+              //console.log('identity', identity);
               this.playStatus(servicename, (err, status) => {
                 if (!err && status) {
                   remaining--;
                   this.services[servicename] = {identity: identity, status: status};
-                  //console.log(identity, status);
+                  //console.log(identity, status, remaining);
                   if (this.selected === '' && status === 'Playing') {
                     this.selected = servicename;
                   }
@@ -66,15 +77,23 @@ module.exports = class {
                     found = true;
                   }
                   if (remaining == 0) {
-                    if (this.selected === '' || !found) {
+                    if (this.selected === '' || found === false) {
                       this.selected = servicename;
+                      //console.log('default service', servicename);
                     }
                   }
+                } else {
+                  remaining--;
                 }
               });
             }
           });
+        } else {
+          remaining--;
         }
+      }
+      if (this.noServices()) {
+        this.selected = '';
       }
     });
   }
@@ -84,9 +103,14 @@ module.exports = class {
       cb(undefined, 'Chrome');
       return;
     }
+    if (service.includes('chromium')) {
+      cb(undefined, 'Chromium');
+      return;
+    }
+    //console.log('service', service);
     this.bus.getInterface(service, '/org/mpris/MediaPlayer2', 'org.mpris.MediaPlayer2', (err, iface) => {
       if (err) {
-        //console.error(service, err);
+        console.error(service, err);
         cb(err);
         return;
       }
@@ -101,19 +125,24 @@ module.exports = class {
 
   playStatus(service, cb) {
     service = service || this.selected;
+    if (this.noServices()) {
+      cb(undefined, 'Unknown');
+      return;
+    }
     if (service.includes('chrome')) {
       cb(undefined, 'Unknown');
       return;
     }
+    //console.log('service', service);
     this.bus.getInterface(service, '/org/mpris/MediaPlayer2', 'org.mpris.MediaPlayer2.Player', (err, iface) => {
       if (err) {
-        //console.error(err);
+        console.error(err);
         cb(err);
         return;
       }
 
       iface.getProperty('PlaybackStatus', (err, value) => {
-        //console.log('.PlaybackStatus', value);
+        //console.log(service, '.PlaybackStatus', value);
         if(this.services[service]) this.services[service].status = value;
         cb(undefined, value);
       });
@@ -122,6 +151,10 @@ module.exports = class {
   }
 
   metadata(cb) {
+    if (this.noServices()) {
+      cb(undefined, 'Unknown');
+      return;
+    }
     if(this.services[this.selected].status == 'Playing') {
       this.bus.getInterface(this.selected, '/org/mpris/MediaPlayer2', 'org.mpris.MediaPlayer2.Player', (err, iface) => {
         let title = '                    ';
@@ -152,6 +185,10 @@ module.exports = class {
 
   method(action, cb) {
     cb = cb || function () {};
+    if (this.noServices()) {
+      cb(undefined, 'Unknown');
+      return;
+    }
     if (this.selected.includes('chrome')) {
       exec('dbus-send --session --print-reply --dest=' + this.selected
            +  ' /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.' + action, (error, stdout, stderr) => {

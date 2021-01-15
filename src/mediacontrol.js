@@ -94,7 +94,7 @@ module.exports = class {
     } else {
       this.sendLines(0x02, '', '');
     }
-    console.log('***', this.dbs.services[this.dbs.selected].identity, status, artist,title);
+    //console.log('***', this.dbs.services[this.dbs.selected].identity, status, artist,title);
   }
 
   pause(line1, line2, line3, line4) {
@@ -207,12 +207,18 @@ module.exports = class {
 
   updateStatus(dbs) {
     dbs = dbs || this.dbs;
-    dbs.playStatus(undefined, (err, status) => {
-      //console.log('status', status);
-      dbs.metadata((err, artist, title, album) => {
-        this.sendPlayerStatus(artist, title, album);
-        dbs.list();
+    if (!dbs.noServices()) {
+      //console.log('test', dbs);
+      dbs.playStatus(undefined, (err, status) => {
+        //console.log('status', status);
+        dbs.metadata((err, artist, title, album) => {
+          this.sendPlayerStatus(artist, title, album);
+        });
       });
-    });
+    } else {
+      this.sendLines(0x01, 'No player', '', 0x01);
+      this.sendLines(0x02, '', '');
+      dbs.list();
+    }
   }
 }

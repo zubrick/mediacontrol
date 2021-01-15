@@ -24,7 +24,7 @@ hidd.connect();
 
 interval = setInterval(() => {
   if(hidd.connected) {
-    mc.updateStatus(dbs);
+    mc.updateStatus();
   }
 }, 5000);
 
