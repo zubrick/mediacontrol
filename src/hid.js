@@ -26,7 +26,7 @@ module.exports = class {
     //console.log('deviceInfo',deviceInfo);
     if( deviceInfo ) {
       this.device = new HID.HID( deviceInfo.path );
-      //console.log(device);
+      //console.log(deviceInfo);
       // ... use device
       this.device.on("data", this.cbData);
       this.device.on("error", (err) => {

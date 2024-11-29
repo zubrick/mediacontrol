@@ -7,9 +7,10 @@
 var loudness = require('loudness');
 
 module.exports = class {
-  constructor (dbus, hidd) {
+  constructor (dbus, hidd, ha) {
     this.dbs = dbus;
     this.hidd = hidd;
+    this.ha = ha;
     this.volIncrement = 3;
 
     this.getMuted();
@@ -201,6 +202,12 @@ module.exports = class {
     case 0x20:
       this.dbs.switchSelected();
       this.updateStatus();
+      break;
+    case 0x31:
+      this.ha.call('0x31');
+      break;
+    case 0x32:
+      this.ha.call('0x32');
       break;
     }
   }

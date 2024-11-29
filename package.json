@@ -13,13 +13,14 @@
   "files": [],
   "dependencies": {
     "dbus-native": "^0.4.0",
-    "loudness": "^0.3.0",
-    "node-hid": "^1.1.0",
+    "homeassistant": "^0.2.0",
+    "loudness": "^0.4.2",
+    "node-hid": "^3.1.0",
     "notify-send": "^0.1.2",
-    "request": "^2.88.0"
+    "request": "^2.88.2"
   },
   "devDependencies": {
-    "dbus": "^1.0.5",
-    "eslint-plugin-import": "^2.22.1"
+    "dbus": "^1.0.7",
+    "eslint-plugin-import": "^2.29.1"
   }
 }

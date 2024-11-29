@@ -61,15 +61,15 @@ module.exports = class {
       for (let i = 0; i < arr.length; i++) {
         if (arr[i] !== '') {
           let servicename=arr[i].replace(/ /g,'');
-          //console.log('player', "-"+servicename+"-");
+          console.log('player', "-"+servicename+"-");
           this.getIdentity(servicename, (err, identity) => {
             if (!err && identity) {
-              //console.log('identity', identity);
+              console.log('identity', identity);
               this.playStatus(servicename, (err, status) => {
                 if (!err && status) {
                   remaining--;
                   this.services[servicename] = {identity: identity, status: status};
-                  //console.log(identity, status, remaining);
+                  console.log(identity, status, remaining);
                   if (this.selected === '' && status === 'Playing') {
                     this.selected = servicename;
                   }
@@ -79,7 +79,7 @@ module.exports = class {
                   if (remaining == 0) {
                     if (this.selected === '' || found === false) {
                       this.selected = servicename;
-                      //console.log('default service', servicename);
+                      console.log('default service', servicename);
                     }
                   }
                 } else {
@@ -99,8 +99,16 @@ module.exports = class {
   }
 
   getIdentity(service, cb) {
+    if (service.includes('firefox')) {
+      cb(undefined, 'Mozilla Firefox');
+      return;
+    }
     if (service.includes('chrome')) {
       cb(undefined, 'Chrome');
+      return;
+    }
+    if (service.includes('edge')) {
+      cb(undefined, 'Edge');
       return;
     }
     if (service.includes('chromium')) {
@@ -130,6 +138,14 @@ module.exports = class {
       return;
     }
     if (service.includes('chrome')) {
+      cb(undefined, 'Unknown');
+      return;
+    }
+    if (service.includes('edge')) {
+      cb(undefined, 'Unknown');
+      return;
+    }
+    if (service.includes('firefox')) {
       cb(undefined, 'Unknown');
       return;
     }
@@ -189,7 +205,7 @@ module.exports = class {
       cb(undefined, 'Unknown');
       return;
     }
-    if (this.selected.includes('chrome')) {
+    if (this.selected.includes('chrome') || this.selected.includes('edge') || this.selected.includes('firefox')) {
       exec('dbus-send --session --print-reply --dest=' + this.selected
            +  ' /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.' + action, (error, stdout, stderr) => {
              //console.log(error, stdout, stderr);
