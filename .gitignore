@@ -65,3 +65,4 @@ package-lock.json
 *.tgz
 # Docs and reports #
 ######################
+config.json
